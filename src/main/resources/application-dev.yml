@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/
+      database: forex
+
+forex:
+  api:
+    url: "http://localhost:8088/v1/DailyForeignExchangeRates"
+  cron: "*/3 * * * * *"
