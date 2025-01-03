@@ -1,5 +1,8 @@
 package com.tpi.forexapi.constant;
 
+/**
+ * 成功代碼
+ */
 public class OkCodes {
     private OkCodes() {}
 

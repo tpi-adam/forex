@@ -8,4 +8,5 @@ forex:
   api:
     url: "https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates"
 #  cron: "*/3 * * * * *"
+  # 每天18:00
   cron: "0 0 18 1/1 * ?"

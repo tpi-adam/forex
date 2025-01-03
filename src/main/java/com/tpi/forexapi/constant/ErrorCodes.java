@@ -1,5 +1,8 @@
 package com.tpi.forexapi.constant;
 
+/**
+ * 錯誤代碼
+ */
 public class ErrorCodes {
     private ErrorCodes() {}
 

@@ -1,6 +1,7 @@
 package com.tpi.forexapi;
 
 import com.tpi.forexapi.constant.OkCodes;
+import com.tpi.forexapi.dto.BaseResponseDTO;
 import com.tpi.forexapi.dto.ForexSearchResponseDTO;
 import com.tpi.forexapi.service.ForexService;
 import com.tpi.forexapi.util.JsonUtils;
@@ -31,11 +32,11 @@ public class ControllerTest {
     @Test
     public void testForexSearch() throws Exception {
         ForexSearchResponseDTO responseDTO = ForexSearchResponseDTO.builder()
-                                                                   .error(ForexSearchResponseDTO.Error.builder()
-                                                                                                      .message(
-                                                                                                              OkCodes.OK_MSG)
-                                                                                                      .code(OkCodes.OK_CODE)
-                                                                                                      .build())
+                                                                   .error(BaseResponseDTO.Error.builder()
+                                                                                               .message(
+                                                                                                       OkCodes.OK_MSG)
+                                                                                               .code(OkCodes.OK_CODE)
+                                                                                               .build())
                                                                    .currency(
                                                                            List.of(ForexSearchResponseDTO.Currency.builder()
                                                                                                                   .usd("10")

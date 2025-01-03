@@ -1,6 +1,5 @@
 package com.tpi.forexapi.service.impl;
 
-import com.tpi.forexapi.constant.ErrorCodes;
 import com.tpi.forexapi.constant.ForexConstants;
 import com.tpi.forexapi.constant.OkCodes;
 import com.tpi.forexapi.dao.ForexRateRepository;
@@ -33,14 +32,18 @@ public class ForexServiceImpl implements ForexService {
     public List<ForexRate> fetchForexData() {
         return forexWebClient.get()
                              .retrieve()
+                             // 該API回傳json string
                              .bodyToMono(String.class)
                              .flatMapMany(response -> Flux.fromIterable(
                                      Arrays.asList(JsonUtils.toObject(response, Map[].class))))
                              .onErrorResume(error -> {
+                                 // 若連線有誤則以log紀錄並回傳空的紀錄
                                  log.error("Forex API error: {}", error.getMessage());
                                  return Flux.empty();
                              })
+                             // 處理資料
                              .map(this::processForexData)
+                             // 只處理欄位完整的資料
                              .filter(forexRate -> forexRate.getDate() != null && forexRate.getUsd2ntd() != null)
                              .collectList().block();
     }
@@ -48,6 +51,7 @@ public class ForexServiceImpl implements ForexService {
     @Override
     public void updateForexDB(List<ForexRate> forexRates) {
         for (ForexRate forexRate : forexRates) {
+            // 先以日期查詢是否已有存在的紀錄，有的話更新舊資料，沒有則新增
             ForexRate existedRate = forexRateRepository.findByDate(forexRate.getDate());
             ForexRate savedRate = null;
             if (existedRate != null) {
@@ -60,6 +64,12 @@ public class ForexServiceImpl implements ForexService {
         }
     }
 
+    /**
+     * 針對取得的外部資料做處理、格式檢查，並轉換成符合DB的model
+     *
+     * @param data
+     * @return
+     */
     private ForexRate processForexData(Map data) {
         String usd2ntdData = Objects.toString(data.get(ForexConstants.FOREX_RATE_USD_TO_NTD));
         BigDecimal usd2ntd = null;
@@ -89,26 +99,13 @@ public class ForexServiceImpl implements ForexService {
 
     @Override
     public ForexSearchResponseDTO search(String startDate, String endDate, String currency) {
+        // 起訖日期
         LocalDate localStartDate = DateTimeUtils.stringToLocalDate(startDate, DateTimeUtils.DATE_FORMAT_YYYYMMDD_SLASH);
         LocalDate localEndDate = DateTimeUtils.stringToLocalDate(endDate, DateTimeUtils.DATE_FORMAT_YYYYMMDD_SLASH);
-
-        // 日期區間僅限 1 年前~當下日期-1 天，若日期區間不符規則， response 需回 error code E001
-        LocalDate today = LocalDate.now();
-        LocalDate lastYear = today.minusYears(1);
-        LocalDate yesterday = today.minusDays(1);
-        if (localStartDate.isBefore(lastYear) || localStartDate.isAfter(yesterday) || localEndDate.isBefore(lastYear) ||
-            localEndDate.isAfter(yesterday)) {
-            return ForexSearchResponseDTO.builder()
-                                         .error(ForexSearchResponseDTO.Error.builder()
-                                                                            .code(ErrorCodes.INVALID_DATE_FORMAT_CODE)
-                                                                            .message(ErrorCodes.INVALID_DATE_FORMAT_MSG)
-                                                                            .build())
-                                         .build();
-        }
-
+        // 查詢
         List<ForexRate> forexRateList =
                 forexRateRepository.findByDateBetween(localStartDate.atStartOfDay(), localEndDate.atStartOfDay());
-
+        // 包裝回應
         ForexSearchResponseDTO responseDTO = ForexSearchResponseDTO.builder()
                                                                    .error(ForexSearchResponseDTO.Error.builder()
                                                                                                       .code(OkCodes.OK_CODE)
@@ -130,7 +127,6 @@ public class ForexServiceImpl implements ForexService {
             }
             responseDTO.setCurrency(currencyList);
         }
-
         return responseDTO;
     }
 

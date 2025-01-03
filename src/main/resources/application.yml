@@ -1,7 +1,12 @@
 spring:
   profiles:
+    # 開發環境可改用dev參數
     active: ${FOREX_PROFILE:test}
+#    active: dev
   application:
     name: ForexAPI
+  mvc:
+    problemdetails:
+      enabled: true
 server:
   port: 8080

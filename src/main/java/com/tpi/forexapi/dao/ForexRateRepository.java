@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * ForexRate DAO
+ */
 @Repository
 public interface ForexRateRepository extends MongoRepository<ForexRate, String> {
     ForexRate findByDate(LocalDateTime date);

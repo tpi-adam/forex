@@ -1,5 +1,8 @@
 package com.tpi.forexapi.constant;
 
+/**
+ * 常用常數
+ */
 public class ForexConstants {
 
     private ForexConstants() {}
